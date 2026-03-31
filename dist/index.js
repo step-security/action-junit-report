@@ -43702,7 +43702,7 @@ async function attachSummary(table, detailsTable, flakySummary, checkInfos = [],
     await summary.write();
 }
 function buildCommentIdentifier(checkName) {
-    return `<!-- Summary comment for ${JSON.stringify(checkName)} by mikepenz/action-junit-report -->`;
+    return `<!-- Summary comment for ${JSON.stringify(checkName)} by step-security/action-junit-report -->`;
 }
 async function attachComment(octokit, checkName, updateComment, table, detailsTable, flakySummary, checkInfos = [], prId) {
     // Use provided prId or fall back to context issue number

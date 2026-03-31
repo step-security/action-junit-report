@@ -136,7 +136,7 @@ describe('attachComment', () => {
 
     const existingComment = {
       id: 999,
-      body: 'Existing comment <!-- Summary comment for ["Test Check"] by mikepenz/action-junit-report -->'
+      body: 'Existing comment <!-- Summary comment for ["Test Check"] by step-security/action-junit-report -->'
     }
     mockOctokit.paginate.mockResolvedValue([existingComment])
 
@@ -209,7 +209,7 @@ describe('attachComment', () => {
 
     const existingComment = {
       id: 888,
-      body: 'Existing comment <!-- Summary comment for ["Test Check"] by mikepenz/action-junit-report -->'
+      body: 'Existing comment <!-- Summary comment for ["Test Check"] by step-security/action-junit-report -->'
     }
     mockOctokit.paginate.mockResolvedValue([existingComment])
 
@@ -244,6 +244,6 @@ describe('buildCommentIdentifier', () => {
   it('should build correct identifier', () => {
     const checkName = ['Test Check']
     const identifier = buildCommentIdentifier(checkName)
-    expect(identifier).toBe('<!-- Summary comment for ["Test Check"] by mikepenz/action-junit-report -->')
+    expect(identifier).toBe('<!-- Summary comment for ["Test Check"] by step-security/action-junit-report -->')
   })
 })

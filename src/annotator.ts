@@ -178,7 +178,7 @@ export async function attachSummary(
 }
 
 export function buildCommentIdentifier(checkName: string[]): string {
-  return `<!-- Summary comment for ${JSON.stringify(checkName)} by mikepenz/action-junit-report -->`
+  return `<!-- Summary comment for ${JSON.stringify(checkName)} by step-security/action-junit-report -->`
 }
 
 export async function attachComment(

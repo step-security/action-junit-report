@@ -28,7 +28,6 @@
     <a href="#whats-included-">What's included 🚀</a> &bull;
     <a href="#setup">Setup 🛠️</a> &bull;
     <a href="#sample-%EF%B8%8F">Sample 🖥️</a> &bull;
-    <a href="#contribute-">Contribute 🧬</a> &bull;
     <a href="#license">License 📓</a>
 </p>
 
@@ -308,35 +307,6 @@ This will selectively use different methods for forked and unforked repos.
 <div align="center">
   <img src=".github/images/annotations.png"/>
 </div>
-
-## Contribute 🧬
-
-```bash
-# Install the dependencies  
-$ npm install
-
-# Verify lint is happy
-$ npm run lint -- --fix
-
-# Format
-$ npm run format
-
-# Build the typescript and package it for distribution
-$ npm run build && npm run package
-
-# Run the tests, use to debug, and test it out
-$ npm test
-```
-
-### Credits
-
-Original idea and GitHub Actions by: https://github.com/ScaCap/action-surefire-report
-
-## Other actions
-
-- [release-changelog-builder-action](https://github.com/mikepenz/release-changelog-builder-action)
-- [xray-action](https://github.com/mikepenz/xray-action/)
-- [jira-release-composition-action](https://github.com/mikepenz/jira-release-composite-action)
 
 ## License
 
