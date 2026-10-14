@@ -1,0 +1,17 @@
+{
+  "$comment": "Managed automatically when syncing with upstream. Do not edit by hand.",
+  "schema_version": 1,
+  "onboarding_type": "copied",
+  "action_type": "node",
+  "upstream": {
+    "repository": "mikepenz/action-junit-report",
+    "synced_tag": "v6.6.1",
+    "synced_commit": "6ef3fdcfcd5f0b5d14df3e659ef19b8c6820f93d",
+    "archived": false
+  },
+  "build": {
+    "package_manager": "npm@11.19.0",
+    "node_version": "24",
+    "script": "package"
+  }
+}

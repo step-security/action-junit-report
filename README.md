@@ -1,37 +1,100 @@
 [![StepSecurity Maintained Action](https://raw.githubusercontent.com/step-security/maintained-actions-assets/main/assets/maintained-action-banner.png)](https://docs.stepsecurity.io/actions/stepsecurity-maintained-actions)
 
-<div align="center">
-  :octocat:
-</div>
-<h1 align="center">
-  action-junit-report
-</h1>
+<h1 align="center">action-junit-report</h1>
 
 <p align="center">
     ... reports JUnit test results as GitHub pull request check.
 </p>
 
-<div align="center">
-  <img src=".github/images/action.png"/>
-</div>
-
-<div align="center">
-  <a href="https://github.com/step-security/action-junit-report">
-		<img src="https://github.com/step-security/action-junit-report/workflows/CI/badge.svg"/>
-	</a>
-</div>
-<br />
-
--------
+<p align="center">
+	<a href="https://github.com/mikepenz/action-junit-report/actions"><img src="https://github.com/mikepenz/action-junit-report/workflows/CI/badge.svg" alt="CI"></a>
+	<a href="https://github.com/marketplace/actions/junit-report-action"><img src="https://img.shields.io/github/v/release/mikepenz/action-junit-report?label=marketplace&color=1A7F37" alt="Marketplace"></a>
+	<a href="https://scorecard.dev/viewer/?uri=github.com/mikepenz/action-junit-report"><img src="https://api.scorecard.dev/projects/github.com/mikepenz/action-junit-report/badge" alt="OpenSSF Scorecard"></a>
+	<a href="#license"><img src="https://img.shields.io/badge/license-Apache--2.0-blue" alt="License"></a>
+</p>
 
 <p align="center">
-    <a href="#whats-included-">What's included 🚀</a> &bull;
-    <a href="#setup">Setup 🛠️</a> &bull;
-    <a href="#sample-%EF%B8%8F">Sample 🖥️</a> &bull;
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/mikepenz/action-junit-report/main/.github/images/hero-dark.svg">
+    <img src="https://raw.githubusercontent.com/mikepenz/action-junit-report/main/.github/images/hero-light.svg" width="100%" alt="action-junit-report: JUnit XML reports become a pull request check with pass/fail counts and an inline annotation on the failing line">
+  </picture>
+</p>
+
+<p align="center">
+    <a href="#quickstart-">Quickstart 🛠️</a> &bull;
+    <a href="#showcase-">Showcase 🖥️</a> &bull;
+    <a href="#inputs">Inputs</a> &bull;
+    <a href="#action-outputs">Outputs</a> &bull;
+    <a href="#reference">Reference 📖</a> &bull;
     <a href="#license">License 📓</a>
 </p>
 
+| | |
+|---|---|
+| ✅ **A check on the pull request** | One check run per report, with the failure annotated on the line that failed |
+| 📊 **Summaries where you look** | `job_summary`, `detailed_summary`, `flaky_summary` — and `comment: true` to post them on the PR |
+| 🧩 **Parses what other tools emit** | `<failure>` and `<error>`, nested suites, retries via `check_retries`, any language |
+| 🔐 **No `checks: write`? Still works** | `annotate_only: true` annotates forks and read-only tokens without a check run |
+| 🏷️ **Titles you control** | `check_title_template` with `{{BREAD_CRUMB}}`, `{{SUITE_NAME}}`, `{{TEST_NAME}}`, `{{CLASS_NAME}}` |
+| 📈 **Counts as outputs** | `total`, `passed`, `failed`, `skipped`, `retried`, `report_url` for downstream steps |
+
+## Quickstart 🛠️
+
+**1.** Add the action after your test step, and let it run even when the tests failed:
+
+```yml
+- name: Publish Test Report
+  id: report
+  uses: step-security/action-junit-report@v6
+  if: success() || failure() # always run even if the previous step fails
+  with:
+    report_paths: '**/build/test-results/test/TEST-*.xml'
+```
+
+**2.** Give the workflow permission to create the check:
+
+```yml
+permissions:
+  checks: write
+  pull-requests: write # only required if `comment: true` was enabled
+```
+
+**3.** Optionally read the counts back out — see [Action outputs](#action-outputs):
+
+```yml
+- run: echo "${{ steps.report.outputs.failed }} of ${{ steps.report.outputs.total }} tests failed"
+```
+
+> [!TIP]
+> Running from a `workflow_run` workflow, or from a fork? See [PR run permissions](#pr-run-permissions).
+
+## Showcase 🖥️
+
+The failure is annotated inline, on the line the test failed on:
+
+<p align="center">
+  <img src="https://raw.githubusercontent.com/mikepenz/action-junit-report/main/.github/images/annotated.png" width="100%" alt="A pull request diff showing two check failures annotated inline on the failing lines of EmailAddressTest.java">
+</p>
+
+...and collected on the check run, one entry per failed test case:
+
+<p align="center">
+  <img src="https://raw.githubusercontent.com/mikepenz/action-junit-report/main/.github/images/annotations.png" width="100%" alt="The Annotations panel of a check run listing 13 errors and 1 warning with file and line references">
+</p>
+
 -------
+
+# Reference
+
+| Topic | |
+|---|---|
+| [What's included](#whats-included-) | The short feature list |
+| [Configure the workflow](#configure-the-workflow) | The full workflow example |
+| [Inputs](#inputs) | Every input the action accepts |
+| [Common Configurations](#common-configurations) | `report_paths` per build tool, Node heap tuning |
+| [Action outputs](#action-outputs) | `total`, `passed`, `failed`, `summary`, `report_url`, … |
+| [PR run permissions](#pr-run-permissions) | Forks, `workflow_run`, and `annotate_only` |
+| [Contribute](#contribute-) | Build and test the action locally |
 
 ### What's included 🚀
 
@@ -80,7 +143,7 @@ jobs:
 | `token`                      | Optional. GitHub token for creating a check run. Set to `${{ github.token }}` by default.                                                                                                           |
 | `group_reports`              | Optional. Defines if different reports found by a single `report_paths` glob expression are grouped together. Defaults to `true`.                                                                   |
 | `test_files_prefix`          | Optional. Prepends the provided prefix to test file paths within the report when annotating on GitHub.                                                                                              |
-| `exclude_sources`            | Optional. Provide `,` seperated array of folders to ignore for source lookup. Defaults to: `/build/,/__pycache__/`                                                                                  |
+| `exclude_sources`            | Optional. Provide `,` or newline separated list of folders to ignore for source lookup. Defaults to: `/build/,/__pycache__/`                                                                        |
 | `check_name`                 | Optional. Check name to use when creating a check run. The default is `JUnit Test Report`.                                                                                                          |
 | `suite_regex`                | REMOVED (as of v5). Instead use `check_title_template` and configure: `{{BREAD_CRUMB}}{{SUITE_NAME}}/{{TEST_NAME}}`                                                                                 |
 | `commit`                     | Optional. The commit SHA to update the status. This is useful when you run it with `workflow_run`.                                                                                                  |
@@ -101,6 +164,8 @@ jobs:
 | `job_summary`                | Optional. Enables the publishing of the job summary for the results. Defaults to `true`. May be required to disable [Enterprise Server](https://github.com/step-security/action-junit-report/issues/637) |
 | `job_summary_text`           | Optional. Additional text to include in the job summary prior to the tables. Defaults to empty string.                                                                                              |
 | `detailed_summary`           | Optional. Include table with all test results in the summary (Also applies to comment). Defaults to `false`.                                                                                        |
+| `failed_summary`             | Optional. Include the failed tests in the detailed summary, when `false` they are removed from it (Also applies to comment). Requires `detailed_summary`. Defaults to `true`. |
+| `failed_summary_logs`        | Optional. Show failed tests as collapsible blocks with the error message and stack trace after the table, instead of rows in the table. Requires `detailed_summary` and `failed_summary`. When `false`, failed tests stay in the table. Defaults to `false`. |
 | `flaky_summary`              | Optional. Include table with all flaky results in the summary (Also applies to comment). Defaults to `false`.                                                                                       |
 | `verbose_summary`            | Optional. Detail table will note if there were no test annotations for a test suite (Also applies to comment). Defaults to `true`.                                                                  |
 | `skip_success_summary`       | Optional. Skips the summary table if only successful tests were detected (Also applies to comment). Defaults to `false`.                                                                            |
@@ -180,7 +245,7 @@ A full set list of possible output values for this action.
 | `outputs.retried`          | The number of retried test cases.                                                                                   |
 | `outputs.failed`           | The number of failed test cases.                                                                                    |
 | `outputs.summary`          | The short summary of the junit report. In html format (as also constructed by GitHub for the summary).              |
-| `outputs.detailed_summary` | The full table with all test results in a summary. In html format (as also constructed by GitHub for the summary).  |
+| `outputs.detailed_summary` | The detailed summary in HTML, including a table and optional collapsible failed-test logs. |
 | `outputs.flaky_summary`    | The full table with all flaky results in a summary. In html format (as also constructed by GitHub for the summary). |
 | `outputs.report_url`       | The URL(s) to the test report(s). If multiple reports are created, they are separated by newlines.                  |
 
@@ -297,16 +362,34 @@ jobs:
 This will selectively use different methods for forked and unforked repos.
 </p>
 </details>
+## Contribute 🧬
 
-## Sample 🖥️
+```bash
+# Install the dependencies  
+$ npm install
 
-<div align="center">
-  <img src=".github/images/annotated.png"/>
-</div>
+# Verify lint is happy
+$ npm run lint -- --fix
 
-<div align="center">
-  <img src=".github/images/annotations.png"/>
-</div>
+# Format
+$ npm run format
+
+# Build the typescript and package it for distribution
+$ npm run build && npm run package
+
+# Run the tests, use to debug, and test it out
+$ npm test
+```
+
+### Credits
+
+Original idea and GitHub Actions by: https://github.com/ScaCap/action-surefire-report
+
+## Other actions
+
+- [release-changelog-builder-action](https://github.com/mikepenz/release-changelog-builder-action)
+- [xray-action](https://github.com/mikepenz/xray-action/)
+- [jira-release-composition-action](https://github.com/mikepenz/jira-release-composite-action)
 
 ## License
 
