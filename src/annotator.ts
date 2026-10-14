@@ -1,7 +1,7 @@
 import * as core from '@actions/core'
 import {Annotation, TestResult} from './testParser.js'
 import * as github from '@actions/github'
-import {buildLink, buildList, buildTable} from './utils.js'
+import {buildLink, buildList, buildTable, escapeHtml} from './utils.js'
 import {SummaryTableRow} from './types.js'
 
 type GitHub = ReturnType<typeof github.getOctokit>
@@ -149,7 +149,8 @@ export async function attachSummary(
   detailsTable: SummaryTableRow[],
   flakySummary: SummaryTableRow[],
   checkInfos: CheckInfo[] = [],
-  summaryText?: string
+  summaryText?: string,
+  failedSection = ''
 ): Promise<void> {
   // Add summary text if provided
   if (summaryText) {
@@ -162,6 +163,9 @@ export async function attachSummary(
   if (detailsTable.length > 1) {
     core.summary.addTable(detailsTable)
   }
+  if (failedSection) {
+    core.summary.addRaw(failedSection, true)
+  }
   if (flakySummary.length > 1) {
     core.summary.addTable(flakySummary)
   }
@@ -169,7 +173,7 @@ export async function attachSummary(
   // Add check links to the job summary if any checks were created
   if (checkInfos.length > 0) {
     const links = checkInfos.map(checkInfo => {
-      return buildLink(`View ${checkInfo.name}`, checkInfo.url)
+      return buildLink(`View ${escapeHtml(checkInfo.name)}`, checkInfo.url)
     })
     core.summary.addList(links)
   }
@@ -189,7 +193,8 @@ export async function attachComment(
   detailsTable: SummaryTableRow[],
   flakySummary: SummaryTableRow[],
   checkInfos: CheckInfo[] = [],
-  prId?: string
+  prId?: string,
+  renderFailures: (maxLength?: number) => string = () => ''
 ): Promise<void> {
   // Use provided prId or fall back to context issue number
   const issueNumber = prId ? parseInt(prId, 10) : context.issue.number
@@ -208,26 +213,36 @@ export async function attachComment(
 
   const identifier = buildCommentIdentifier(checkName)
 
-  let comment = buildTable(table)
+  let head = buildTable(table)
   if (detailsTable.length > 1) {
-    comment += '\n\n'
-    comment += buildTable(detailsTable)
+    head += '\n\n'
+    head += buildTable(detailsTable)
   }
+
+  let tail = ''
   if (flakySummary.length > 1) {
-    comment += '\n\n'
-    comment += buildTable(flakySummary)
+    tail += '\n\n'
+    tail += buildTable(flakySummary)
   }
 
   // Add check links to the job summary if any checks were created
   if (checkInfos.length > 0) {
     const links = checkInfos.map(checkInfo => {
-      return buildLink(`View ${checkInfo.name}`, checkInfo.url)
+      return buildLink(`View ${escapeHtml(checkInfo.name)}`, checkInfo.url)
     })
-    comment += buildList(links)
-    comment += `\n\n`
+    tail += buildList(links)
+    tail += `\n\n`
   }
 
-  comment += `\n\n${identifier}`
+  tail += `\n\n${identifier}`
+
+  let comment = head
+  const failedSection = renderFailures(65536 - head.length - tail.length - 2)
+  if (failedSection) {
+    comment += '\n\n'
+    comment += failedSection
+  }
+  comment += tail
 
   const priorComment = updateComment ? await findPriorComment(octokit, identifier, issueNumber) : undefined
   if (priorComment) {

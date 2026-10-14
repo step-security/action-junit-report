@@ -26,6 +26,17 @@ export function retrieve(name: string, items: string[], index: number, total: nu
 }
 
 /**
+ * Splits a list input on newlines and commas, trimming and dropping empty entries.
+ * Historically `exclude_sources` was documented as comma separated, both are accepted.
+ */
+export function splitList(items: string[]): string[] {
+  return items
+    .flatMap(item => item.split(','))
+    .map(item => item.trim())
+    .filter(item => item !== '')
+}
+
+/**
  * Reads in the configuration from the JSON file
  */
 export function readTransformers(raw: string | undefined): Transformer[] {
@@ -106,6 +117,16 @@ export function buildTable(rows: SummaryTableRow[]): string {
   return wrap('table', tableBody)
 }
 
+export function escapeHtml(value: string): string {
+  // Raw blank lines end HTML blocks in Markdown and can activate injected links or images.
+  return value
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/\r/g, '&#13;')
+    .replace(/\n/g, '&#10;')
+}
+
 /**
  * Wraps content in an HTML tag, adding any HTML attributes
  *
@@ -120,7 +141,8 @@ function wrap(tag: string, content: string | null, attrs: {[attribute: string]: 
     .map(([key, value]) => ` ${key}="${value}"`)
     .join('')
 
-  if (!content) {
+  // only void tags (explicit `null` content) are self-closing; an empty string still needs a closing tag
+  if (content === null) {
     return `<${tag}${htmlAttrs}>`
   }
 

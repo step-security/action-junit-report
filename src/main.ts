@@ -2,7 +2,7 @@ import * as core from '@actions/core'
 import * as github from '@actions/github'
 import {annotateTestResult, attachComment, attachSummary, CheckInfo} from './annotator.js'
 import {parseTestReports, TestResult} from './testParser.js'
-import {buildTable, readTransformers, retrieve} from './utils.js'
+import {buildTable, readTransformers, retrieve, splitList} from './utils.js'
 import {GitHub} from '@actions/github/lib/utils'
 import {buildSummaryTables} from './table.js'
 import axios, {isAxiosError} from 'axios'
@@ -77,6 +77,8 @@ export async function run(): Promise<void> {
     const jobSummary = core.getInput('job_summary') === 'true'
     const jobSummaryText = core.getInput('job_summary_text')
     const detailedSummary = core.getInput('detailed_summary') === 'true'
+    const failedSummary = core.getInput('failed_summary') !== 'false'
+    const failedSummaryLogs = core.getInput('failed_summary_logs') === 'true'
     const flakySummary = core.getInput('flaky_summary') === 'true'
     const verboseSummary = core.getInput('verbose_summary') === 'true'
     const skipSuccessSummary = core.getInput('skip_success_summary') === 'true'
@@ -95,7 +97,7 @@ export async function run(): Promise<void> {
     const checkName = core.getMultilineInput('check_name')
     const testFilesPrefix = core.getMultilineInput('test_files_prefix')
     const suiteRegex = core.getMultilineInput('suite_regex')
-    let excludeSources = core.getMultilineInput('exclude_sources') ? core.getMultilineInput('exclude_sources') : []
+    let excludeSources = splitList(core.getMultilineInput('exclude_sources'))
     const checkTitleTemplate = core.getMultilineInput('check_title_template')
     const breadCrumbDelimiter = core.getInput('bread_crumb_delimiter')
     const transformers = readTransformers(core.getInput('transformers', {trimWhitespace: true}))
@@ -230,7 +232,7 @@ export async function run(): Promise<void> {
     }
 
     const supportsJobSummary = process.env['GITHUB_STEP_SUMMARY']
-    const [table, detailTable, flakyTable] = buildSummaryTables(
+    const [table, detailTable, flakyTable, renderFailures] = buildSummaryTables(
       testResults,
       includePassed,
       includeSkipped,
@@ -241,11 +243,14 @@ export async function run(): Promise<void> {
       groupSuite,
       includeEmptyInSummary,
       includeTimeInSummary,
-      simplifiedSummary
+      simplifiedSummary,
+      failedSummary,
+      failedSummaryLogs
     )
+    const failedSection = renderFailures()
     if (jobSummary && supportsJobSummary) {
       try {
-        await attachSummary(table, detailTable, flakyTable, checkInfos, jobSummaryText)
+        await attachSummary(table, detailTable, flakyTable, checkInfos, jobSummaryText, failedSection)
       } catch (error) {
         core.error(`❌ Failed to set the summary using the provided token. (${error})`)
       }
@@ -257,11 +262,21 @@ export async function run(): Promise<void> {
 
     if (comment && (!skipCommentWithoutTests || mergedResult.totalCount > 0)) {
       const octokit: InstanceType<typeof GitHub> = github.getOctokit(token)
-      await attachComment(octokit, checkName, updateComment, table, detailTable, flakyTable, checkInfos, prId)
+      await attachComment(
+        octokit,
+        checkName,
+        updateComment,
+        table,
+        detailTable,
+        flakyTable,
+        checkInfos,
+        prId,
+        renderFailures
+      )
     }
 
     core.setOutput('summary', buildTable(table))
-    core.setOutput('detailed_summary', buildTable(detailTable))
+    core.setOutput('detailed_summary', buildTable(detailTable) + failedSection)
     core.setOutput('flaky_summary', buildTable(flakyTable))
 
     // Set report URLs as output (newline-separated for multiple reports)
