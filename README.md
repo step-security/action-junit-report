@@ -7,16 +7,16 @@
 </p>
 
 <p align="center">
-	<a href="https://github.com/mikepenz/action-junit-report/actions"><img src="https://github.com/mikepenz/action-junit-report/workflows/CI/badge.svg" alt="CI"></a>
-	<a href="https://github.com/marketplace/actions/junit-report-action"><img src="https://img.shields.io/github/v/release/mikepenz/action-junit-report?label=marketplace&color=1A7F37" alt="Marketplace"></a>
-	<a href="https://scorecard.dev/viewer/?uri=github.com/mikepenz/action-junit-report"><img src="https://api.scorecard.dev/projects/github.com/mikepenz/action-junit-report/badge" alt="OpenSSF Scorecard"></a>
+	<a href="https://github.com/step-security/action-junit-report/actions"><img src="https://github.com/step-security/action-junit-report/workflows/CI/badge.svg" alt="CI"></a>
+	<a href="https://github.com/marketplace/actions/junit-report-action"><img src="https://img.shields.io/github/v/release/step-security/action-junit-report?label=marketplace&color=1A7F37" alt="Marketplace"></a>
+	<a href="https://scorecard.dev/viewer/?uri=github.com/step-security/action-junit-report"><img src="https://api.scorecard.dev/projects/github.com/step-security/action-junit-report/badge" alt="OpenSSF Scorecard"></a>
 	<a href="#license"><img src="https://img.shields.io/badge/license-Apache--2.0-blue" alt="License"></a>
 </p>
 
 <p align="center">
   <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/mikepenz/action-junit-report/main/.github/images/hero-dark.svg">
-    <img src="https://raw.githubusercontent.com/mikepenz/action-junit-report/main/.github/images/hero-light.svg" width="100%" alt="action-junit-report: JUnit XML reports become a pull request check with pass/fail counts and an inline annotation on the failing line">
+    <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/step-security/action-junit-report/main/.github/images/hero-dark.svg">
+    <img src="https://raw.githubusercontent.com/step-security/action-junit-report/main/.github/images/hero-light.svg" width="100%" alt="action-junit-report: JUnit XML reports become a pull request check with pass/fail counts and an inline annotation on the failing line">
   </picture>
 </p>
 
@@ -73,13 +73,13 @@ permissions:
 The failure is annotated inline, on the line the test failed on:
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/mikepenz/action-junit-report/main/.github/images/annotated.png" width="100%" alt="A pull request diff showing two check failures annotated inline on the failing lines of EmailAddressTest.java">
+  <img src="https://raw.githubusercontent.com/step-security/action-junit-report/main/.github/images/annotated.png" width="100%" alt="A pull request diff showing two check failures annotated inline on the failing lines of EmailAddressTest.java">
 </p>
 
 ...and collected on the check run, one entry per failed test case:
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/mikepenz/action-junit-report/main/.github/images/annotations.png" width="100%" alt="The Annotations panel of a check run listing 13 errors and 1 warning with file and line references">
+  <img src="https://raw.githubusercontent.com/step-security/action-junit-report/main/.github/images/annotations.png" width="100%" alt="The Annotations panel of a check run listing 13 errors and 1 warning with file and line references">
 </p>
 
 -------
@@ -362,34 +362,6 @@ jobs:
 This will selectively use different methods for forked and unforked repos.
 </p>
 </details>
-## Contribute 🧬
-
-```bash
-# Install the dependencies  
-$ npm install
-
-# Verify lint is happy
-$ npm run lint -- --fix
-
-# Format
-$ npm run format
-
-# Build the typescript and package it for distribution
-$ npm run build && npm run package
-
-# Run the tests, use to debug, and test it out
-$ npm test
-```
-
-### Credits
-
-Original idea and GitHub Actions by: https://github.com/ScaCap/action-surefire-report
-
-## Other actions
-
-- [release-changelog-builder-action](https://github.com/mikepenz/release-changelog-builder-action)
-- [xray-action](https://github.com/mikepenz/xray-action/)
-- [jira-release-composition-action](https://github.com/mikepenz/jira-release-composite-action)
 
 ## License
 
